@@ -601,6 +601,13 @@ pipeline:
       when:
         matrix:
           TESTS-ACCEPTANCE: users
+  acceptance-settings-users:
+      image: nextcloudci/acceptance-php7.1:acceptance-php7.1-2
+      commands:
+        - tests/acceptance/run-local.sh --timeout-multiplier 10 --nextcloud-server-domain acceptance-settings-users --selenium-server selenium:4444 allow-git-repository-modifications features/settings-users.feature
+      when:
+        matrix:
+          TESTS-ACCEPTANCE: settings-users
   nodb-codecov:
     image: nextcloudci/php7.0:php7.0-19
     commands:
@@ -770,6 +777,8 @@ matrix:
       TESTS-ACCEPTANCE: login
     - TESTS: acceptance
       TESTS-ACCEPTANCE: users
+    - TESTS: acceptance
+      TESTS-ACCEPTANCE: settings-users
     - TESTS: jsunit
     - TESTS: syntax-php7.0
     - TESTS: syntax-php7.1
