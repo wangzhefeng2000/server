@@ -196,7 +196,7 @@ class ShareAPIController extends OCSController {
 			$result['share_with_displayname'] = $share->getPassword();
 
 			$result['token'] = $share->getToken();
-			$result['url'] = $this->urlGenerator->linkToRouteAbsolute('files_sharing.sharecontroller.showShare', ['token' => $share->getToken()]);
+			$result['url'] = $this->urlGenerator->linkToRouteAbsolute('files_sharing.sharecontroller.show', ['token' => $share->getToken()]);
 
 		} else if ($share->getShareType() === \OCP\Share::SHARE_TYPE_REMOTE) {
 			$result['share_with'] = $share->getSharedWith();
