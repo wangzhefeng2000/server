@@ -30,6 +30,6 @@ namespace OCP\Authentication\TwoFactorAuth;
  *
  * @since 14.0.0
  */
-interface IStatefulProvider {
-	//put your code here
+interface IStatefulProvider extends IProvider {
+
 }
