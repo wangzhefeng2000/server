@@ -432,6 +432,7 @@ class Server extends ServerContainer implements IServerContainer {
 				$c->query(EventDispatcherInterface::class)
 			);
 		});
+		$this->registerAlias(\OCP\Authentication\TwoFactorAuth\IRegistry::class, \OC\Authentication\TwoFactorAuth\Registry::class);
 
 		$this->registerAlias(\OCP\INavigationManager::class, \OC\NavigationManager::class);
 		$this->registerAlias('NavigationManager', \OCP\INavigationManager::class);

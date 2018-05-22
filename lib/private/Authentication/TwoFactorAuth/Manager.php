@@ -160,12 +160,15 @@ class Manager {
 	/**
 	 * Get the list of 2FA providers for the given user
 	 *
+	 * @todo migrate to IRegistry and don't rely on all providers being available
+	 *
 	 * @param IUser $user
 	 * @param bool $includeBackupApp
+	 * @param bool $filterEnabled only return providers which are enabled for the given user
 	 * @return IProvider[]
 	 * @throws Exception
 	 */
-	public function getProviders(IUser $user, bool $includeBackupApp = false): array {
+	public function getProviders(IUser $user, bool $includeBackupApp = false, bool $filterEnabled = true): array {
 		$allApps = $this->appManager->getEnabledAppsForUser($user);
 		$providers = [];
 
@@ -191,10 +194,14 @@ class Manager {
 			}
 		}
 
-		return array_filter($providers, function ($provider) use ($user) {
-			/* @var $provider IProvider */
-			return $provider->isTwoFactorAuthEnabledForUser($user);
-		});
+		if ($filterEnabled) {
+			return array_filter($providers, function ($provider) use ($user) {
+				/* @var $provider IProvider */
+				return $provider->isTwoFactorAuthEnabledForUser($user);
+			});
+		} else {
+			return $providers;
+		}
 	}
 
 	/**

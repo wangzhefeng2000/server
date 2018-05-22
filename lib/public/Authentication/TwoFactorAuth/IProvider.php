@@ -93,6 +93,7 @@ interface IProvider {
 	 * Decides whether 2FA is enabled for the given user
 	 *
 	 * @since 9.1.0
+	 * @deprecated 14.0.0 migrate to IStatefulProvider
 	 *
 	 * @param IUser $user
 	 * @return bool
