@@ -115,14 +115,7 @@ class LDAPContext implements Context {
 		$userId = array_shift($userResults);
 
 		$this->sendingTo('GET', '/cloud/users/' . $userId);
-
-		foreach($expectations->getRowsHash() as $k => $v) {
-			$value = (string)simplexml_load_string($this->response->getBody())->data[0]->$k;
-			PHPUnit_Framework_Assert::assertEquals($v, $value);
-		}
-
-		$backend = (string)simplexml_load_string($this->response->getBody())->data[0]->backend;
-		PHPUnit_Framework_Assert::assertEquals('LDAP', $backend);
+		$this->theRecordFieldsShouldMatch($expectations);
 	}
 
 	/**
@@ -180,5 +173,18 @@ class LDAPContext implements Context {
 			}
 		}
 		PHPUnit_Framework_Assert::assertSame((int)$expectedCount, $uidsFound);
+	}
+
+	/**
+	 * @Given /^the record's fields should match$/
+	 */
+	public function theRecordFieldsShouldMatch(TableNode $expectations) {
+		foreach($expectations->getRowsHash() as $k => $v) {
+			$value = (string)simplexml_load_string($this->response->getBody())->data[0]->$k;
+			PHPUnit_Framework_Assert::assertEquals($v, $value);
+		}
+
+		$backend = (string)simplexml_load_string($this->response->getBody())->data[0]->backend;
+		PHPUnit_Framework_Assert::assertEquals('LDAP', $backend);
 	}
 }

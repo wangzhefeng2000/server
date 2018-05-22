@@ -13,6 +13,31 @@ Feature: LDAP
       | alice | 1 |
       | ghost | 0 |
 
+  Scenario: check default home of an LDAP user
+    Given As an "admin"
+    And sending "GET" to "/cloud/users/alice"
+    Then the OCS status code should be "200"
+    And the record's fields should match
+      | storageLocation | /dev/shm/nc_int/alice |
+
+  Scenario: check custom relative home of an LDAP user
+    Given modify LDAP configuration
+      | homeFolderNamingRule | sn |
+    And As an "admin"
+    And sending "GET" to "/cloud/users/alice"
+    Then the OCS status code should be "200"
+    And the record's fields should match
+      | storageLocation | /dev/shm/nc_int/Alfgeirdottir |
+
+  Scenario: check custom relative home of an LDAP user
+    Given modify LDAP configuration
+      | homeFolderNamingRule | roomNumber |
+    And As an "admin"
+    And sending "GET" to "/cloud/users/alice"
+    Then the OCS status code should be "200"
+    And the record's fields should match
+      | storageLocation | /dev/shm/alice-data |
+
   Scenario: Fetch all users, invoking pagination
     Given modify LDAP configuration
       | ldapBaseUsers  | ou=PagingTest,dc=nextcloud,dc=ci |
@@ -45,7 +70,7 @@ Feature: LDAP
       | leo     | 1 |
       | stigur  | 1 |
 
-  Scenario: Fetch first foall users, invoking pagination
+  Scenario: Fetch from second batch of all users, invoking pagination
     Given modify LDAP configuration
       | ldapBaseUsers  | ou=PagingTest,dc=nextcloud,dc=ci |
       | ldapPagingSize | 2                                |
