@@ -338,7 +338,7 @@ class ShareController extends FilesPublicShareController {
 		$ogPreview = '';
 		if ($shareTmpl['previewSupported']) {
 			$shareTmpl['previewImage'] = $this->urlGenerator->linkToRouteAbsolute( 'files_sharing.PublicPreview.getPreview',
-				['x' => 200, 'y' => 200, 'file' => $shareTmpl['directory_path'], 't' => $shareTmpl['dirToken']]);
+				['x' => 200, 'y' => 200, 'file' => $shareTmpl['directory_path'], 'token' => $shareTmpl['dirToken']]);
 			$ogPreview = $shareTmpl['previewImage'];
 
 			// We just have direct previews for image files
