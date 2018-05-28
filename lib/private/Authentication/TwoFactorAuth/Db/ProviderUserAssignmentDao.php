@@ -58,7 +58,7 @@ class ProviderUserAssignmentDao {
 		$result = $query->execute();
 		$providers = [];
 		foreach ($result->fetchAll() as $row) {
-			$providers[$row['provider_id']] = $row['enabled'] === 1;
+			$providers[$row['provider_id']] = 1 === (int) $row['enabled'];
 		}
 		$result->closeCursor();
 
@@ -79,7 +79,7 @@ class ProviderUserAssignmentDao {
 			'enabled' => $qb->createNamedParameter($enabled),
 		]);
 
-		$result = $query->execute();
+		$query->execute();
 	}
 
 }

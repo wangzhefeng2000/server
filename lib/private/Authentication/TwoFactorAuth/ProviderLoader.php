@@ -46,21 +46,14 @@ class ProviderLoader {
 	/**
 	 * Get the list of 2FA providers for the given user
 	 *
-	 * @todo migrate to IRegistry and don't rely on all providers being available
-	 *
-	 * @param bool $includeBackupApp
 	 * @return IProvider[]
 	 * @throws Exception
 	 */
-	public function getProviders(IUser $user, bool $includeBackupApp = false): array {
+	public function getProviders(IUser $user): array {
 		$allApps = $this->appManager->getEnabledAppsForUser($user);
 		$providers = [];
 
 		foreach ($allApps as $appId) {
-			if (!$includeBackupApp && $appId === self::BACKUP_CODES_APP_ID) {
-				continue;
-			}
-
 			$info = $this->appManager->getAppInfo($appId);
 			if (isset($info['two-factor-providers'])) {
 				/** @var string[] $providerClasses */

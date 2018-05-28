@@ -46,7 +46,6 @@ class Manager {
 
 	const SESSION_UID_KEY = 'two_factor_auth_uid';
 	const SESSION_UID_DONE = 'two_factor_auth_passed';
-	const BACKUP_CODES_PROVIDER_ID = 'backup_codes';
 	const REMEMBER_LOGIN = 'two_factor_remember_login';
 
 	/** @var ProviderLoader */
@@ -99,7 +98,7 @@ class Manager {
 	 */
 	public function isTwoFactorAuthenticated(IUser $user): bool {
 		$twoFactorEnabled = ((int) $this->config->getUserValue($user->getUID(), 'core', 'two_factor_auth_disabled', 0)) === 0;
-		return $twoFactorEnabled && \count($this->getProviders($user)) > 0;
+		return $twoFactorEnabled && \count($this->getProviderSet($user)->getProviders()) > 0;
 	}
 
 	/**
@@ -128,15 +127,8 @@ class Manager {
 	 * @return IProvider|null
 	 */
 	public function getProvider(IUser $user, string $challengeProviderId) {
-		$providers = $this->getProviders($user, true);
+		$providers = $this->getProviderSet($user)->getProviders();
 		return $providers[$challengeProviderId] ?? null;
-	}
-
-	/**
-	 * @return IProvider|null the backup provider, if enabled for the given user
-	 */
-	public function getBackupProvider(IUser $user) {
-		return $this->getProvider($user, self::BACKUP_CODES_PROVIDER_ID);
 	}
 
 	/**
@@ -172,27 +164,63 @@ class Manager {
 	}
 
 	/**
+	 * @param array $states
+	 * @param IProvider $providers
+	 */
+	private function isProviderMissing(array $states, array $providers): bool {
+		$indexed = [];
+		foreach ($providers as $provider) {
+			$indexed[$provider->getId()] = $provider;
+		}
+
+		$missing = [];
+		foreach ($states as $providerId => $enabled) {
+			if (!$enabled) {
+				// Don't care
+				continue;
+			}
+
+			if (!isset($indexed[$providerId])) {
+				$missing[] = $providerId;
+				$this->logger->alert("two-factor auth provider '$providerId' failed to load",
+					[
+					'app' => 'core',
+				]);
+			}
+		}
+
+		if (!empty($missing)) {
+			// There was at least one provider missing
+			$this->logger->alert(count($missing) . " two-factor auuth providers failed to load",
+				[
+				'app' => 'core',
+			]);
+
+			return true;
+		}
+
+		// If we reach this, there was not a single provider missing
+		return false;
+	}
+
+	/**
 	 * Get the list of 2FA providers for the given user
 	 *
-	 * @todo migrate to IRegistry and don't rely on all providers being available
-	 *
 	 * @param IUser $user
-	 * @param bool $includeBackupApp
-	 * @return IProvider[]
 	 * @throws Exception
 	 */
-	public function getProviders(IUser $user, bool $includeBackupApp = false): array {
+	public function getProviderSet(IUser $user): ProviderSet {
 		$providerStates = $this->providerRegistry->getProviderStates($user);
-		// TODO: also handle loading errors of single provider but don't fail hard
-		//       and show a warning instead
-		$providers = $this->providerLoader->getProviders($user, $includeBackupApp);
+		$providers = $this->providerLoader->getProviders($user);
 
 		$fixedStates = $this->fixMissingProviderStates($providerStates, $providers, $user);
+		$isProviderMissing = $this->isProviderMissing($fixedStates, $providers);
 
-		return array_filter($providers,
+		$enabled = array_filter($providers,
 			function (IProvider $provider) use ($fixedStates) {
 			return $fixedStates[$provider->getId()];
 		});
+		return new ProviderSet($enabled, $isProviderMissing);
 	}
 
 	/**
@@ -259,7 +287,7 @@ class Manager {
 		try {
 			$this->activityManager->publish($activity);
 		} catch (BadMethodCallException $e) {
-			$this->logger->warning('could not publish backup code creation activity', ['app' => 'core']);
+			$this->logger->warning('could not publish activity', ['app' => 'core']);
 			$this->logger->logException($e, ['app' => 'core']);
 		}
 	}

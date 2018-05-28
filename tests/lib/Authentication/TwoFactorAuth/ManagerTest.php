@@ -213,7 +213,7 @@ class ManagerTest extends TestCase {
 					],
 		]));
 
-		$this->manager->getProviders($this->user);
+		$this->manager->getProviderSet($this->user);
 	}
 
 	public function testIsTwoFactorAuthenticated() {
@@ -236,12 +236,6 @@ class ManagerTest extends TestCase {
 		$this->assertSame($this->fakeProvider, $this->manager->getProvider($this->user, 'email'));
 	}
 
-	public function testGetBackupProvider() {
-		$this->prepareProvidersWitBackupProvider();
-
-		$this->assertSame($this->backupProvider, $this->manager->getBackupProvider($this->user));
-	}
-
 	public function testGetInvalidProvider() {
 		$this->prepareProviders();
 
@@ -254,7 +248,7 @@ class ManagerTest extends TestCase {
 			'email' => $this->fakeProvider,
 		];
 
-		$this->assertEquals($expectedProviders, $this->manager->getProviders($this->user));
+		$this->assertEquals($expectedProviders, $this->manager->getProviderSet($this->user));
 	}
 
 	public function testVerifyChallenge() {
