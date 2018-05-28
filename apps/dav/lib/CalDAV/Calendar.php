@@ -167,6 +167,16 @@ class Calendar extends \Sabre\CalDAV\Calendar implements IShareable {
 			];
 		}
 
+		// TODO - Is everybody supposed to have read rights? rather not
+		if (strpos($this->getOwner(), 'principals/calendar-resources') === 0 ||
+			strpos($this->getOwner(), 'principals/calendar-rooms') === 0) {
+			$acl[] = [
+				'privilege' => '{DAV:}read',
+				'principal' => '{DAV:}authenticated',
+				'protected' => true,
+			];
+		}
+
 		$acl = $this->caldavBackend->applyShareAcl($this->getResourceId(), $acl);
 
 		if (!$this->isShared()) {

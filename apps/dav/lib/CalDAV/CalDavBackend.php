@@ -76,6 +76,9 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	const PERSONAL_CALENDAR_URI = 'personal';
 	const PERSONAL_CALENDAR_NAME = 'Personal';
 
+	const RESOURCE_BOOKING_CALENDAR_URI = 'calendar';
+	const RESOURCE_BOOKING_CALENDAR_NAME = 'Calendar';
+
 	/**
 	 * We need to specify a max date, because we need to stop *somewhere*
 	 *
@@ -2347,6 +2350,9 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	}
 
 	private function convertPrincipal($principalUri, $toV2) {
+		\OC::$server->getLogger()->error($principalUri);
+		\OC::$server->getLogger()->error($this->principalBackend->getPrincipalPrefix());
+
 		if ($this->principalBackend->getPrincipalPrefix() === 'principals') {
 			list(, $name) = Uri\split($principalUri);
 			if ($toV2 === true) {
