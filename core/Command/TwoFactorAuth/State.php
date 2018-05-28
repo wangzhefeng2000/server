@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * @copyright 2018 Christoph Wurst <christoph@winzerhof-wurst.at>
  *
@@ -24,12 +26,8 @@
 
 namespace OC\Core\Command\TwoFactorAuth;
 
-use OC\Authentication\TwoFactorAuth\Manager as TwoFactorManager;
 use OC\Core\Command\Base;
-use OCP\Authentication\TwoFactorAuth\IProvider;
 use OCP\Authentication\TwoFactorAuth\IRegistry;
-use OCP\Authentication\TwoFactorAuth\IStatefulProvider;
-use OCP\IUser;
 use OCP\IUserManager;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -43,15 +41,11 @@ class State extends Base {
 	/** @var IUserManager */
 	private $userManager;
 
-	/** @var TwoFactorManager */
-	private $twoFactorManager;
-
-	public function __construct(IRegistry $registry, IUserManager $userManager,
-		TwoFactorManager $twoFactorManager) {
+	public function __construct(IRegistry $registry, IUserManager $userManager) {
 		parent::__construct('twofactorauth:state');
-		$this->userManager = $userManager;
+
 		$this->registry = $registry;
-		$this->twoFactorManager = $twoFactorManager;
+		$this->userManager = $userManager;
 	}
 
 	protected function configure() {
@@ -69,51 +63,47 @@ class State extends Base {
 			$output->writeln("<error>Invalid UID</error>");
 			return;
 		}
-		if ($this->registry->isTwoFactorEnabledFor($user)) {
+
+		$providerStates = $this->registry->getProviderStates($user);
+		$filtered = $this->filterEnabledDisabledUnknownProviders($providerStates);
+		list ($enabled, $disabled) = $filtered;
+
+		if (!empty($enabled)) {
 			$output->writeln("Two-factor authentication is enabled for user $uid");
 		} else {
 			$output->writeln("Two-factor authentication is not enabled for user $uid");
 		}
 
 		$output->writeln("");
-
-		list ($enabled, $disabled, $unknown) = $this->filterEnabledDisabledUnknownProviders($user,
-			$this->twoFactorManager->getProviders($user, true, false));
-
 		$this->printProviders("Enabled providers", $enabled, $output);
 		$this->printProviders("Disabled providers", $disabled, $output);
-		$this->printProviders("Legacy providers with unknown state", $unknown, $output);
 	}
 
-	private function filterEnabledDisabledUnknownProviders(IUser $user,
-		array $providers): array {
+	private function filterEnabledDisabledUnknownProviders(array $providerStates): array {
 		$enabled = [];
 		$disabled = [];
-		$unknown = [];
 
-		foreach ($providers as $provider) {
-			/* @var $provider IProvider */
-			if ($provider instanceof IStatefulProvider) {
-				if ($this->registry->isProviderEnabledFor($provider, $user)) {
-					$enabled[] = $provider;
-				} else {
-					$disabled[] = $provider;
-				}
+		foreach ($providerStates as $providerId => $isEnabled) {
+			if ($isEnabled) {
+				$enabled[] = $providerId;
 			} else {
-				$unknown[] = $provider;
+				$disabled[] = $providerId;
 			}
 		}
 
-		return [$enabled, $disabled, $unknown];
+		return [$enabled, $disabled];
 	}
 
 	private function printProviders(string $title, array $providers,
 		OutputInterface $output) {
-		if (!empty($providers)) {
-			$output->writeln($title . ":");
-			foreach ($providers as $provider) {
-				$output->writeln("- " . $provider->getId() . " (" . $provider->getDescription() . ")");
-			}
+		if (empty($providers)) {
+			// Ignore and don't print anything
+			return;
+		}
+
+		$output->writeln($title . ":");
+		foreach ($providers as $provider) {
+			$output->writeln("- " . $provider);
 		}
 	}
 

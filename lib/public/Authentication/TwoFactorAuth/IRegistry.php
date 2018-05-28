@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * @copyright 2018 Christoph Wurst <christoph@winzerhof-wurst.at>
  *
@@ -38,30 +40,26 @@ use OCP\IUser;
 interface IRegistry {
 
 	/**
-	 * Check if at least one 2FA provider is active for the given user
+	 * Get a key-value map of providers and their enabled/disabled state for
+	 * the given user.
 	 *
 	 * @since 14.0.0
+	 * @return string[] where the array key is the provider ID (string) and the
+	 *                  value is the enabled state (bool)
 	 */
-	public function isTwoFactorEnabledFor(IUser $user): bool;
-
-	/**
-	 * Check if the given 2FA provider is active for the given user
-	 *
-	 * @since 14.0.0
-	 */
-	public function isProviderEnabledFor(IStatefulProvider $provider, IUser $user): bool;
+	public function getProviderStates(IUser $user): array;
 
 	/**
 	 * Enable the given 2FA provider for the given user
 	 *
 	 * @since 14.0.0
 	 */
-	public function enableProviderFor(IStatefulProvider $provider, IUser $user);
+	public function enableProviderFor(IProvider $provider, IUser $user);
 
 	/**
 	 * Disable the given 2FA provider for the given user
 	 *
 	 * @since 14.0.0
 	 */
-	public function disableProviderFor(IStatefulProvider $provider, IUser $user);
+	public function disableProviderFor(IProvider $provider, IUser $user);
 }

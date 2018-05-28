@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * @copyright 2018 Christoph Wurst <christoph@winzerhof-wurst.at>
  *
@@ -24,28 +26,30 @@
 
 namespace OC\Authentication\TwoFactorAuth;
 
+use OC\Authentication\TwoFactorAuth\Db\ProviderUserAssignmentDao;
+use OCP\Authentication\TwoFactorAuth\IProvider;
 use OCP\Authentication\TwoFactorAuth\IRegistry;
-use OCP\Authentication\TwoFactorAuth\IStatefulProvider;
 use OCP\IUser;
 
 class Registry implements IRegistry {
 
-	public function isTwoFactorEnabledFor(IUser $user): bool {
-		// TODO
-		return false;
+	/** @var ProviderUserAssignmentDao */
+	private $assignmentDao;
+
+	public function __construct(ProviderUserAssignmentDao $assignmentDao) {
+		$this->assignmentDao = $assignmentDao;
 	}
 
-	public function isProviderEnabledFor(IStatefulProvider $provider, IUser $user): bool {
-		// TODO
-		return false;
+	public function getProviderStates(IUser $user): array {
+		return $this->assignmentDao->getState($user->getUID());
 	}
 
-	public function enableProviderFor(IStatefulProvider $provider, IUser $user) {
-		// TODO
+	public function enableProviderFor(IProvider $provider, IUser $user) {
+		$this->assignmentDao->persist($provider->getId(), $user->getUID(), true);
 	}
 
-	public function disableProviderFor(IStatefulProvider $provider, IUser $user) {
-		// TODO
+	public function disableProviderFor(IProvider $provider, IUser $user) {
+		$this->assignmentDao->persist($provider->getId(), $user->getUID(), false);
 	}
 
 }
