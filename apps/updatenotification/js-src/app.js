@@ -36,7 +36,6 @@ define(function (require) {
 				}
 			});
 			this.vm = new Vue(require('./components/root.vue'));
-
 			this.vm.newVersionString = data.newVersionString;
 			this.vm.lastCheckedDate = data.lastChecked;
 			this.vm.isUpdateChecked = data.isUpdateChecked;
@@ -44,6 +43,8 @@ define(function (require) {
 			this.vm.downloadLink = data.downloadLink;
 			this.vm.isNewVersionAvailable = data.isNewVersionAvailable;
 			this.vm.updateServerURL = data.updateServerURL;
+			this.vm.changelogURL = data.changelogURL;
+			this.vm.whatsNewData = data.whatsNew;
 			this.vm.currentChannel = data.currentChannel;
 			this.vm.channels = data.channels;
 			this.vm.notifyGroups = data.notifyGroups;
