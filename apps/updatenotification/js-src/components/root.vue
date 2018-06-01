@@ -295,10 +295,10 @@
 			toggleHideAvailableUpdates: function() {
 				this.hideAvailableUpdates = !this.hideAvailableUpdates;
 			},
-			toggleMenu() {
+			toggleMenu: function() {
 				this.openedWhatsNew = !this.openedWhatsNew;
 			},
-			hideMenu() {
+			hideMenu: function() {
 				this.openedWhatsNew = false;
 			},
 		},
