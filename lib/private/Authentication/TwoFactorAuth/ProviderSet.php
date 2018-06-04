@@ -38,11 +38,14 @@ class ProviderSet {
 	private $providerMissing;
 
 	/**
-	 * @param array $providers
+	 * @param IProvider[] $providers
 	 * @param bool $providerMissing
 	 */
 	public function __construct(array $providers, bool $providerMissing) {
-		$this->providers = $providers;
+		$this->providers = [];
+		foreach ($providers as $provider) {
+			$this->providers[$provider->getId()] = $provider;
+		}
 		$this->providerMissing = $providerMissing;
 	}
 
