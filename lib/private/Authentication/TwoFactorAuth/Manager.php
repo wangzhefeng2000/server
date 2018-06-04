@@ -98,7 +98,15 @@ class Manager {
 	 */
 	public function isTwoFactorAuthenticated(IUser $user): bool {
 		$twoFactorEnabled = ((int) $this->config->getUserValue($user->getUID(), 'core', 'two_factor_auth_disabled', 0)) === 0;
-		return $twoFactorEnabled && \count($this->getProviderSet($user)->getProviders()) > 0;
+
+		if (!$twoFactorEnabled) {
+			return false;
+		}
+
+		$providerStates = $this->providerRegistry->getProviderStates($user);
+		$enabled = array_filter($providerStates);
+
+		return $twoFactorEnabled && !empty($enabled);
 	}
 
 	/**

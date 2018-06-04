@@ -38,7 +38,8 @@ class ProviderSet {
 	private $providerMissing;
 
 	/**
-	 * @param IProvider $providers
+	 * @param array $providers
+	 * @param bool $providerMissing
 	 */
 	public function __construct(array $providers, bool $providerMissing) {
 		$this->providers = $providers;
@@ -54,7 +55,7 @@ class ProviderSet {
 	}
 
 	/**
-	 * @return array
+	 * @return IProvider[]
 	 */
 	public function getProviders(): array {
 		return $this->providers;
