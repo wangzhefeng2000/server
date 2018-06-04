@@ -104,8 +104,6 @@ class TwoFactorChallengeController extends Controller {
 	 */
 	public function selectChallenge($redirect_url) {
 		$user = $this->userSession->getUser();
-		// TODO: also handle loading errors of single provider but don't fail hard
-		//       and show a warning instead
 		$providerSet = $this->twoFactorManager->getProviderSet($user);
 		$allProviders = $providerSet->getProviders();
 		list($providers, $backupProvider) = $this->splitProvidersAndBackupCodes($allProviders);
