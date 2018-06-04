@@ -29,6 +29,9 @@ use OC\Authentication\TwoFactorAuth\Db\ProviderUserAssignmentDao;
 use OCP\IDBConnection;
 use Test\TestCase;
 
+/**
+ * @group DB
+ */
 class ProviderUserAssignmentDaoTest extends TestCase {
 
 	/** @var IDBConnection */
@@ -41,12 +44,53 @@ class ProviderUserAssignmentDaoTest extends TestCase {
 		parent::setUp();
 
 		$this->dbConn = OC::$server->getDatabaseConnection();
+		$qb = $this->dbConn->getQueryBuilder();
+		$q = $qb->delete(ProviderUserAssignmentDao::TABLE_NAME);
+		$res = $q->execute();
 
 		$this->dao = new ProviderUserAssignmentDao($this->dbConn);
 	}
 
+	public function testGetState() {
+		$qb = $this->dbConn->getQueryBuilder();
+		$q1 = $qb->insert(ProviderUserAssignmentDao::TABLE_NAME)->values([
+			'provider_id' => $qb->createNamedParameter('twofactor_u2f'),
+			'uid' => $qb->createNamedParameter('user123'),
+			'enabled' => $qb->createNamedParameter(true),
+		]);
+		$q1->execute();
+		$q2 = $qb->insert(ProviderUserAssignmentDao::TABLE_NAME)->values([
+			'provider_id' => $qb->createNamedParameter('twofactor_totp'),
+			'uid' => $qb->createNamedParameter('user123'),
+			'enabled' => $qb->createNamedParameter(false),
+		]);
+		$q2->execute();
+		$expected = [
+			'twofactor_u2f' => true,
+			'twofactor_totp' => false,
+		];
+
+		$state = $this->dao->getState('user123');
+
+		$this->assertEquals($expected, $state);
+	}
+
 	public function testPersist() {
-		
+		$qb = $this->dbConn->getQueryBuilder();
+
+		$this->dao->persist('twofactor_totp', 'user123', false);
+
+		$q = $qb
+			->select('*')
+			->from(ProviderUserAssignmentDao::TABLE_NAME)
+			->where($qb->expr()->eq('provider_id',
+					$qb->createNamedParameter('twofactor_totp')))
+			->andWhere($qb->expr()->eq('uid', $qb->createNamedParameter('user123')))
+			->andWhere($qb->expr()->eq('enabled', $qb->createNamedParameter(false)));
+		$res = $q->execute();
+		$cnt = $res->rowCount();
+
+		$this->assertSame(1, $cnt);
 	}
 
 }

@@ -26,6 +26,7 @@ declare(strict_types = 1);
 
 namespace OC\Authentication\TwoFactorAuth\Db;
 
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
@@ -76,7 +77,7 @@ class ProviderUserAssignmentDao {
 		$query = $qb->insert(self::TABLE_NAME)->values([
 			'provider_id' => $qb->createNamedParameter($providerId),
 			'uid' => $qb->createNamedParameter($uid),
-			'enabled' => $qb->createNamedParameter($enabled),
+			'enabled' => $qb->createNamedParameter($enabled, IQueryBuilder::PARAM_BOOL),
 		]);
 
 		$query->execute();
