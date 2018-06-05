@@ -862,6 +862,7 @@ $popovericon-size: 16px;
 			align-items: flex-start;
 			height: auto;
 			margin: 0;
+			padding: 3px 20px 3px 3px !important; /* for nice visual balance */
 			font-weight: 300;
 			box-shadow: none;
 			width: 100%;
@@ -900,10 +901,6 @@ $popovericon-size: 16px;
 			&:hover, &:focus, &.active {
 				opacity: 1 !important;
 			}
-			/* prevent .action class to break the design */
-			&.action {
-				padding: inherit !important;
-			}
 			> span {
 				cursor: pointer;
 				white-space: nowrap;
@@ -916,10 +913,6 @@ $popovericon-size: 16px;
 			> select {
 				margin: 0;
 				margin-left: 6px;
-			}
-			/* Add padding if contains icon+text */
-			&:not(:empty) {
-				padding-right: 10px !important;
 			}
 			/* DEPRECATED! old img in popover fallback
 			 * TODO: to remove */
