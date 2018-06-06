@@ -63,11 +63,10 @@
 	import Multiselect from 'vue-multiselect';
 	import AppScore from './appScore';
 	import AppManagement from '../appManagement';
-	import SvgFilterMixin from '../svgFilterMixin';
 
 	export default {
 		name: 'appItem',
-		mixins: [AppManagement, SvgFilterMixin],
+		mixins: [AppManagement],
 		props: {
 			app: {},
 			category: {},
